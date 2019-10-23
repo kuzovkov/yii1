@@ -25,7 +25,7 @@ class MyForm extends Model
             [['name', 'email'], 'required'],
             // email has to be a valid email address
             ['email', 'email', 'message' => 'Invalid email'],
-            [['file'], 'file']
+            [['file'], 'file', 'extensions' => 'jpeg, jpg, png']
         ];
     }
 
