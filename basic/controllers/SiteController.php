@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use Yii;
+use yii\data\Pagination;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
@@ -12,6 +13,7 @@ use app\models\ContactForm;
 use app\models\MyForm;
 use yii\helpers\Html;
 use yii\web\UploadedFile;
+use app\models\Comments;
 
 
 class SiteController extends Controller
@@ -88,6 +90,15 @@ class SiteController extends Controller
         return $this->render('form', ['form' => $form, 'name' => $name, 'email' => $email]);
     }
 
+    public function actionComments(){
+
+        $comments = Comments::find();
+        $pagination = new Pagination(['defaultPageSize' => 2, 'totalCount' => $comments->count()]);
+        $comments = $comments->offset($pagination->offset)->limit($pagination->limit)->all();
+        return $this->render('comments', ['comments'=> $comments, 'pagination' => $pagination]);
+
+    }
+
     /**
      * Login action.
      *
@@ -149,4 +160,5 @@ class SiteController extends Controller
     {
         return $this->render('about');
     }
+
 }
