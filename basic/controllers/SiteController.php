@@ -13,7 +13,9 @@ use app\models\ContactForm;
 use app\models\MyForm;
 use yii\helpers\Html;
 use yii\web\UploadedFile;
+use yii\web\Cookie;
 use app\models\Comments;
+use app\models\ImportForecastsForm;
 
 
 class SiteController extends Controller
@@ -79,6 +81,7 @@ class SiteController extends Controller
     {
         $form = new MyForm();
         if ($form->load(Yii::$app->request->post()) && $form->validate()){
+            //var_dump($_FILES);
             $name = Html::encode($form->name);
             $email = Html::encode($form->email);
             $form->file = UploadedFile::getInstance($form, 'file');
@@ -90,13 +93,53 @@ class SiteController extends Controller
         return $this->render('form', ['form' => $form, 'name' => $name, 'email' => $email]);
     }
 
+    public function actionForm2()
+    {
+        $model = new ImportForecastsForm();
+        if ($model->load(Yii::$app->request->post())){
+            var_dump($_FILES);
+            var_dump($model->validate());
+            //var_dump($model->errors);
+            /*$analyst_id = intval($model->analyst_id);
+            $file = UploadedFile::getInstance($model, 'file');
+            $analyst = Analyst::findOne(['id' => $analyst_id]);
+            if (!$analyst)
+                $error[] = Yii::t('app', 'Analyst not found!');
+            if ($file->hasError)
+                $error[] = $file->error;
+            file_put_contents('/var/www/html/debug.txt', print_r($analyst, true), FILE_APPEND);
+            file_put_contents('/var/www/html/debug.txt', print_r($file->hasError, true), FILE_APPEND);
+            if ($analyst && !$file->hasError){
+
+                $message = ImportController::importForecastsFromCSV($analyst, $file->tempName);
+            }*/
+        }
+        return $this->render('import', [
+            'model' => $model
+        ]);
+
+    }
+
     public function actionComments(){
 
         $comments = Comments::find();
         $pagination = new Pagination(['defaultPageSize' => 2, 'totalCount' => $comments->count()]);
         $comments = $comments->offset($pagination->offset)->limit($pagination->limit)->all();
-        return $this->render('comments', ['comments'=> $comments, 'pagination' => $pagination]);
+        $sessions = Yii::$app->session;
+        $name = $sessions->get('name');
+        $cookies = Yii::$app->request->cookies;
+        $cookiename = $cookies->getValue('name');
+        return $this->render('comments', ['comments'=> $comments, 'pagination' => $pagination, 'name' => $name, 'cookiename' => $cookiename]);
 
+    }
+
+    public function actionUser(){
+        $user = Yii::$app->request->get('name', 'Unknown');
+        $sessions = Yii::$app->session;
+        $sessions->set('name', $user);
+        $cookies = Yii::$app->response->cookies;
+        $cookies->add(new Cookie(['name' => 'name', 'value' => 'cookie-'.$user]));
+        return $this->render('user', ['user' => $user]);
     }
 
     /**

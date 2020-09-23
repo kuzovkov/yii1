@@ -7,7 +7,7 @@ services:
        - db-data:/var/lib/mysql
        - ./db/dump:/dump
        - ./docker/mysql/mysqld.cnf:/etc/mysql/mysql.conf.d/mysqld.cnf:ro
-     restart: always
+     restart: unless-stopped
      ports:
       - "23306:3306"
      environment:
@@ -17,11 +17,11 @@ services:
        MYSQL_PASSWORD: userp@ssw0rd
    nginx:
      image: nginx:1.11-alpine
-     restart: always
+     restart: unless-stopped
      depends_on:
       - app
      ports:
-       - "8005:80"
+       - "8006:80"
      dns: 8.8.8.8
      volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
@@ -31,7 +31,7 @@ services:
      depends_on:
        - db
      build: .
-     restart: always
+     restart: unless-stopped
      dns: 8.8.8.8
      environment:
        DB_HOST: db:3306
